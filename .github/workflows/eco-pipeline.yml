@@ -32,7 +32,7 @@ jobs:
           cat emissions.csv
 
       - name: 📤 Subir Reporte de Emisiones como Artefacto
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: reporte-emisiones
           path: emissions.csv
