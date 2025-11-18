@@ -1,0 +1,45 @@
+name: Eco-Audit & Quality Check
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  eco-quality-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v3
+
+      - name: Configurar Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Instalar Dependencias
+        run: |
+          pip install codecarbon
+          # Si tienes más dependencias: pip install -r requirements.txt
+
+      - name: 🟢 Ejecutar Auditoría de Consumo (CodeCarbon)
+        run: |
+          python main_measured.py
+          echo "----------------------------------------"
+          echo "Resultados de CodeCarbon:"
+          cat emissions.csv
+
+      - name: 📤 Subir Reporte de Emisiones como Artefacto
+        uses: actions/upload-artifact@v3
+        with:
+          name: reporte-emisiones
+          path: emissions.csv
+
+      - name: 🔍 Análisis de Calidad con SonarQube
+        # Nota: Para que esto funcione, necesitas configurar SONAR_TOKEN y SONAR_HOST_URL en los Secrets de GitHub
+        uses: sonarsource/sonar-scanner-cli@master
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
