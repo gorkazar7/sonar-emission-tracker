@@ -39,7 +39,8 @@ jobs:
 
       - name: 🔍 Análisis de Calidad con SonarQube
         # Nota: Para que esto funcione, necesitas configurar SONAR_TOKEN y SONAR_HOST_URL en los Secrets de GitHub
-        uses: sonarsource/sonar-scanner-cli@master
+        # CORRECCIÓN: Cambiamos a la acción oficial 'sonarqube-scan-action'
+        uses: sonarsource/sonarqube-scan-action@master
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
