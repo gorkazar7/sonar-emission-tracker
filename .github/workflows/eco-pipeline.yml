@@ -24,12 +24,20 @@ jobs:
           pip install codecarbon
           # Si tienes más dependencias: pip install -r requirements.txt
 
-      - name: 🟢 Ejecutar Auditoría de Consumo (CodeCarbon)
+      - name: 🟢 Ejecutar Auditoría Reutilizable
+        # AQUI ESTÁ EL CAMBIO CLAVE:
+        # Ejecutamos el runner y le pasamos tu proyecto como argumento
         run: |
-          python main_measured.py
+          python emissions_runner.py main.py
+          
           echo "----------------------------------------"
-          echo "Resultados de CodeCarbon:"
-          cat emissions.csv
+          echo "Verificando generación de reporte..."
+          if [ -f emissions.csv ]; then
+            cat emissions.csv
+          else
+            echo "❌ Error: No se generó el archivo emissions.csv"
+            exit 1
+          fi
 
       - name: 📤 Subir Reporte de Emisiones como Artefacto
         uses: actions/upload-artifact@v4

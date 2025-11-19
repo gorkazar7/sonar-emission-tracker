@@ -1,78 +1,118 @@
-Emission2025-
+# 🟩 Sistema de Auditoría de Código y Consumo Energético
 
-Sistema de Auditoría de Código y Consumo Energético
+Este sistema utiliza un script de auditoría desacoplado
+(`emissions_runner.py`) para medir el consumo energético de cualquier
+proyecto Python **sin modificar tu código fuente**.
 
-Este sistema ejecuta un análisis de calidad y una medición de huella de carbono cada vez que haces un git push.
+## 📂 Estructura del Proyecto
 
-⚠️ Prerrequisito Importante para Linux
+    MI-PROYECTO-ECO/
+    │
+    ├── .github/workflows/
+    │   └── eco-pipeline.yml     <-- Automatización
+    │
+    ├── emissions_runner.py      <-- 🛠️ HERRAMIENTA DE AUDITORÍA (Reutilizable)
+    ├── main.py                  <-- 📦 TU PROYECTO (Limpio, sin código de test)
+    │
+    ├── docker-compose.yml       <-- Infraestructura SonarQube
+    ├── sonar-project.properties <-- Configuración Sonar
+    └── README.md
 
-Si estás en Linux (Ubuntu, Debian, WSL2, etc.), es muy probable que veas el error:
-max virtual memory areas vm.max_map_count [65530] is too low
+## 🚀 Cómo funciona el desacople
 
-SonarQube usa Elasticsearch, el cual requiere más memoria virtual de la que Linux trae por defecto. Debes aumentar este límite en tu máquina host (tu PC):
+### Tu código (`main.py`)
 
-Temporal (se pierde al reiniciar PC):
+Código puro, sin librerías de medición ni lógica extra.
 
-sudo sysctl -w vm.max_map_count=262144
+### El Runner (`emissions_runner.py`)
 
+Script genérico que ejecuta tu programa dentro de un monitor energético.
 
-Permanente:
-Edita el archivo /etc/sysctl.conf y añade esta línea al final:
+**Uso:**
 
-vm.max_map_count=262144
+    python emissions_runner.py <archivo_a_auditar>
 
+### El Pipeline (GitHub Actions)
 
-Luego recarga la configuración con: sudo sysctl -p
+Ejecuta el runner en lugar de tu app, sin tocar tu código.
 
-1. Levantar SonarQube (Local)
+## ⚠️ Prerrequisito en Linux (para SonarQube / Elasticsearch)
 
-Ejecuta el siguiente comando para iniciar el servidor de calidad:
+### Configuración temporal:
 
-docker-compose up -d
+    sudo sysctl -w vm.max_map_count=262144
 
+### Configuración permanente:
 
-Accede a http://localhost:9000 (User: admin, Pass: admin y cámbialo).
+1.  Edita:
 
-2. Configuración del Proyecto
+        sudo nano /etc/sysctl.conf
 
-Crea un proyecto en SonarQube llamado "Eco Hello World".
+2.  Añade:
 
-Genera un Token de análisis.
+        vm.max_map_count=262144
 
-Copia el archivo sonar-project.properties a la raíz de tu código.
+3.  Aplica cambios:
 
-3. Conectar GitHub con tu Sonar Local
+        sudo sysctl -p
 
-GitHub Actions corre en la nube, tu Docker corre en tu PC. Tienes dos opciones:
+## 1️⃣ Levantar SonarQube (Local)
 
-Opción A (Recomendada para pruebas): Usar ngrok para exponer tu puerto 9000 a internet.
+    docker-compose up -d
 
-ngrok http 9000
+Accede a: http://localhost:9000\
+Usuario: admin\
+Contraseña: admin
 
-Copia la URL generada (ej: https://xyz.ngrok.io).
+## 2️⃣ Configuración del Proyecto en SonarQube
 
-Opción B (Producción): Usar SonarCloud.io en lugar de Docker local.
+1.  Create Project → Manually\
+2.  Rellena:
+    -   Display Name: Eco Hello World
+    -   Project Key: eco-helloworld
+    -   Main Branch: main
+3.  Genera token "GithubToken"
+4.  Selecciona "Other" + "Linux"
 
-4. Configurar Secretos en GitHub
+📌 El Project Key debe coincidir con `sonar.projectKey` del archivo
+`sonar-project.properties`.
 
-Ve a tu repositorio en GitHub -> Settings -> Secrets and variables -> Actions -> New Repository Secret:
+## 3️⃣ Configuración de Ngrok
 
-SONAR_TOKEN: El token que generaste en el paso 2.
+### Instalar
 
-SONAR_HOST_URL: Tu URL de ngrok o SonarCloud (ej: https://xyz.ngrok.io).
+-   macOS:
 
-5. Funcionamiento
+        brew install ngrok/ngrok/ngrok
 
-Haces un cambio en el código (main_measured.py).
+-   Windows:
 
-Haces git push.
+        choco install ngrok
 
-GitHub Actions arranca:
+### Autenticar:
 
-Instala codecarbon.
+    ngrok config add-authtoken TU_TOKEN_AQUI
 
-Ejecuta tu script y genera emissions.csv (Mide CO2 y Energía).
+### Exponer SonarQube:
 
-Sube el CSV para que lo puedas descargar.
+    ngrok http 9000
 
-Envía el código a SonarQube para ver si tienes "Code Smells" o errores.
+Copia la URL HTTPS generada.
+
+## 4️⃣ Secretos en GitHub
+
+  Nombre           Valor
+  ---------------- -----------------------------
+  SONAR_TOKEN      Token generado en SonarQube
+  SONAR_HOST_URL   URL HTTPS de ngrok
+
+## 5️⃣ Funcionamiento del Sistema
+
+1.  Haces un push\
+2.  GitHub Actions instala dependencias\
+3.  Ejecuta tu script mediante el runner\
+4.  Genera `emissions.csv`\
+5.  Sube artefacto\
+6.  Envía calidad de código a SonarQube mediante ngrok
+
+------------------------------------------------------------------------
