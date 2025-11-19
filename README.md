@@ -68,8 +68,8 @@ Contraseña: admin
 
 1.  Create Project → Manually\
 2.  Rellena:
-    -   Display Name: Eco Hello World
-    -   Project Key: eco-helloworld
+    -   Display Name: Eco Hello World 
+    -   Project Key: eco-helloworld (esto lo pondras en la pipeline)
     -   Main Branch: main
 3.  Genera token "GithubToken"
 4.  Selecciona "Other" + "Linux"
@@ -88,6 +88,10 @@ Contraseña: admin
 -   Windows:
 
         choco install ngrok
+
+-   Linux:
+
+        apt install ngrok
 
 ### Autenticar:
 
@@ -116,3 +120,5 @@ Copia la URL HTTPS generada.
 6.  Envía calidad de código a SonarQube mediante ngrok
 
 ------------------------------------------------------------------------
+
+Emission2025-

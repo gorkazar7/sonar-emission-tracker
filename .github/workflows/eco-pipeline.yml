@@ -11,8 +11,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout del código
-        uses: actions/checkout@v3
+      - name: 1️⃣ Checkout de TU PROYECTO (El código a auditar)
+        uses: actions/checkout@v4
+
+      - name: 2️⃣ Checkout de las HERRAMIENTAS ECO (El runner)
+        uses: actions/checkout@v4
+        with:
+          repository: gorkazar7/sonar-emission-utils
+          path: eco-tools  # Lo descarga en una carpeta llamada 'eco-tools'
 
       - name: Configurar Python
         uses: actions/setup-python@v4
@@ -28,7 +34,7 @@ jobs:
         # AQUI ESTÁ EL CAMBIO CLAVE:
         # Ejecutamos el runner y le pasamos tu proyecto como argumento
         run: |
-          python emissions_runner.py main.py
+          python eco-tools/emissions_runner.py main.py
           
           echo "----------------------------------------"
           echo "Verificando generación de reporte..."
